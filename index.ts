@@ -2,17 +2,12 @@ const TILE_SIZE = 30;
 const FPS = 30;
 const SLEEP = 1000 / FPS;
 
-enum FallingState {
-  FALLING,
-  RESTLING,
-}
-
-interface FallingState2 {
+interface FallingState {
   isFalling(): boolean;
   isRestling(): boolean;
 }
 
-class Falling implements FallingState2 {
+class Falling implements FallingState {
   isFalling(): boolean {
     return true;
   }
@@ -21,7 +16,7 @@ class Falling implements FallingState2 {
   }
 }
 
-class Restling implements FallingState2 {
+class Restling implements FallingState {
   isFalling(): boolean {
     return false;
   }
@@ -577,7 +572,7 @@ class Player implements Tile {
 }
 
 class Stone implements Tile {
-  constructor(private falling: FallingState2) {
+  constructor(private falling: FallingState) {
     this.falling = falling;
   }
   moveHorizontal(dx: number): void {
@@ -617,13 +612,13 @@ class Stone implements Tile {
     return true;
   }
   isFallingStone(): boolean {
-    return false;
+    return this.falling.isFalling();
   }
   isBox(): boolean {
     return false;
   }
   isFallingBox(): boolean {
-    return this.falling.isFalling();
+    return false;
   }
   isKey1(): boolean {
     return false;
