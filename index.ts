@@ -750,7 +750,7 @@ class Right implements Input {
     return false;
   }
   handle() {
-    moveHorizontal(1);
+    map[playery][playerx + 1].moveHorizontal(1);
   }
 }
 
@@ -768,7 +768,7 @@ class Left implements Input {
     return false;
   }
   handle() {
-    moveHorizontal(-1);
+    map[playery][playerx - 1].moveHorizontal(-1);
   }
 }
 
@@ -892,7 +892,7 @@ function moveToTile(newx: number, newy: number) {
   playery = newy;
 }
 
-function moveHorizontal(dx: number) {
+function moveHorizontal2(dx: number) {
   map[playery][playerx + dx].moveHorizontal(dx);
 }
 
