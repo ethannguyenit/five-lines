@@ -204,12 +204,15 @@ class Stone implements Tile2 {
   }
 
   moveHorizontal(dx: number) {
-    if (
-      map[playery][playerx + dx + dx].isAir() &&
-      !map[playery + 1][playerx + dx].isAir()
-    ) {
-      map[playery][playerx + dx + dx] = this;
-      moveToTile(playerx + dx, playery);
+    if (this.isFallingStone() == false) {
+      if (
+        map[playery][playerx + dx + dx].isAir() &&
+        !map[playery + 1][playerx + dx].isAir()
+      ) {
+        map[playery][playerx + dx + dx] = this;
+        moveToTile(playerx + dx, playery);
+      }
+    } else if (this.isFallingStone() == true) {
     }
   }
 
@@ -250,7 +253,19 @@ class FallingStone implements Tile2 {
   isBoxy(): boolean {
     return false;
   }
-  moveHorizontal(dx: number) {}
+
+  moveHorizontal(dx: number) {
+    if (this.isFallingStone() == false) {
+      if (
+        map[playery][playerx + dx + dx].isAir() &&
+        !map[playery + 1][playerx + dx].isAir()
+      ) {
+        map[playery][playerx + dx + dx] = this;
+        moveToTile(playerx + dx, playery);
+      }
+    } else if (this.isFallingStone() == true) {
+    }
+  }
 
   moveVertical(dy: number) {}
 
