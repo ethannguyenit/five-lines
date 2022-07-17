@@ -40,8 +40,6 @@ class Air implements Tile2 {
   }
 
   moveHorizontal(dx: number) {
-    //isFlux || isAir => IsEdible
-    //isStone || isBox => IsPushable
     moveToTile(playerx + dx, playery);
   }
 
@@ -82,8 +80,6 @@ class Flux implements Tile2 {
   }
 
   moveHorizontal(dx: number) {
-    //isFlux || isAir => IsEdible
-    //isStone || isBox => IsPushable
     moveToTile(playerx + dx, playery);
   }
   moveVertical(dy: number) {
@@ -163,10 +159,7 @@ class Player implements Tile2 {
     return false;
   }
 
-  moveHorizontal(dx: number) {
-    //isFlux || isAir => IsEdible
-    //isStone || isBox => IsPushable
-  }
+  moveHorizontal(dx: number) {}
 
   moveVertical(dy: number) {}
 
@@ -193,9 +186,40 @@ class Player implements Tile2 {
   }
 }
 
-enum FallingState {
-  FALLING,
-  RESTLING,
+interface FallingState {
+  isFalling(): boolean;
+  isRestling(): boolean;
+  moveHorizontal(tile: Tile2, dx: number): void;
+}
+
+class Falling implements FallingState {
+  isFalling(): boolean {
+    return true;
+  }
+  isRestling(): boolean {
+    return false;
+  }
+
+  moveHorizontal(tile: Tile2, dx: number) {}
+}
+
+class Restling implements FallingState {
+  isFalling(): boolean {
+    return false;
+  }
+  isRestling(): boolean {
+    return true;
+  }
+
+  moveHorizontal(tile: Tile2, dx: number) {
+    if (
+      map[playery][playerx + dx + dx].isAir() &&
+      !map[playery + 1][playerx + dx].isAir()
+    ) {
+      map[playery][playerx + dx + dx] = tile;
+      moveToTile(playerx + dx, playery);
+    }
+  }
 }
 
 class Stone implements Tile2 {
@@ -209,16 +233,7 @@ class Stone implements Tile2 {
   }
 
   moveHorizontal(dx: number) {
-    if (this.isFallingStone() == false) {
-      if (
-        map[playery][playerx + dx + dx].isAir() &&
-        !map[playery + 1][playerx + dx].isAir()
-      ) {
-        map[playery][playerx + dx + dx] = this;
-        moveToTile(playerx + dx, playery);
-      }
-    } else if (this.isFallingStone() == true) {
-    }
+    this.falling.moveHorizontal(this, dx);
   }
 
   moveVertical(dy: number) {}
@@ -234,7 +249,7 @@ class Stone implements Tile2 {
   }
 
   isFallingStone() {
-    return this.falling == FallingState.FALLING;
+    return this.falling.isFalling();
   }
 
   isFallingBox() {
@@ -660,9 +675,9 @@ function transformTile(tile: RawTile) {
     case RawTile.UNBREAKABLE:
       return new Unbreakable();
     case RawTile.STONE:
-      return new Stone(FallingState.RESTLING);
+      return new Stone(new Restling());
     case RawTile.FALLING_STONE:
-      return new Stone(FallingState.FALLING);
+      return new Stone(new Falling());
     case RawTile.BOX:
       return new Box();
     case RawTile.FALLING_BOX:
@@ -740,13 +755,13 @@ function updateMap() {
 
 function updateTile(x: number, y: number) {
   if (map[y][x].isStony() && map[y + 1][x].isAir()) {
-    map[y + 1][x] = new Stone(FallingState.FALLING);
+    map[y + 1][x] = new Stone(new Falling());
     map[y][x] = new Air();
   } else if (map[y][x].isBoxy() && map[y + 1][x].isAir()) {
     map[y + 1][x] = new FallingBox();
     map[y][x] = new Air();
   } else if (map[y][x].isFallingStone()) {
-    map[y][x] = new Stone(FallingState.RESTLING);
+    map[y][x] = new Stone(new Restling());
   } else if (map[y][x].isFallingBox()) {
     map[y][x] = new Box();
   }
